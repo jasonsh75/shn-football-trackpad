@@ -1,11 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SHN Football Trackpad</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>SHN Football Trackpad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #f9f9f9; padding: 1rem; }
+    canvas { border: 1px solid #ccc; }
+    button { margin: 0 0.5rem 1rem 0; }
+  </style>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/konva/konva.min.js"></script>
+  <script src="https://unpkg.com/react-konva/umd/react-konva.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/javascript">
+    const { useState, useRef } = React;
+    const { Stage, Layer, Circle } = ReactKonva;
+
+    function App() {
+      const [shapes, setShapes] = useState([]);
+      const stageRef = useRef();
+
+      const addPlayer = () => {
+        const id = shapes.length + 1;
+        setShapes([...shapes, { id, x: 100 + id * 30, y: 100, color: 'blue' }]);
+      };
+
+      const exportPDF = async () => {
+        const canvas = await html2canvas(stageRef.current.content);
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jspdf.jsPDF();
+        pdf.addImage(imgData, 'PNG', 10, 10, 180, 90);
+        pdf.save("trackpad.pdf");
+      };
+
+      return React.createElement("div", null,
+        React.createElement("button", { onClick: addPlayer }, "Add Player"),
+        React.createElement("button", { onClick: exportPDF }, "Export PDF"),
+        React.createElement(Stage, { width: 800, height: 400, ref: stageRef },
+          React.createElement(Layer, null,
+            shapes.map(shape =>
+              React.createElement(Circle, {
+                key: shape.id,
+                x: shape.x,
+                y: shape.y,
+                radius: 20,
+                fill: shape.color,
+                draggable: true
+              })
+            )
+          )
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(App));
+  </script>
+</body>
 </html>

@@ -1,1 +1,1 @@
-// Placeholder for SHN Trackpad code (to be replaced)
+// Placeholder - please paste Trackpad.js content manually or restore from previous session.
